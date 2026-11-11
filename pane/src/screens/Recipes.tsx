@@ -203,6 +203,9 @@ export function Recipe({ id }: { id: RecipeId }) {
             {ASK[id].map((q) => (
               <div class="small muted">"{q}"</div>
             ))}
+            <a class="small" href="https://odds-api.io/mcp" target="_blank" rel="noopener" style={{ marginTop: 4 }}>
+              Connect your AI assistant to the API directly
+            </a>
           </div>
         </section>
       )}

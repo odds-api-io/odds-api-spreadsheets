@@ -6,7 +6,7 @@ Live odds from 450+ bookmakers in Google Sheets, from the [Odds-API.io](https://
 - **Recipes**: one click builds a clean sheet of best prices, arbitrage, value bets or dropping odds, with optional refresh every minute.
 - **Playground**: call any GET endpoint of the API, preview the response and insert it as a table.
 - **Formulas**: `=ODDS(eventId, market, bookmaker)` and `=ODDS_TABLE(sport, league, market)`.
-- **AI-ready**: every table is typed and tidy, comes with suggested questions for Gemini in Sheets, and can be copied as a prompt for ChatGPT or any AI assistant.
+- **AI-ready**: every table is typed and tidy, comes with suggested questions for Gemini in Sheets, and can be copied as a prompt for ChatGPT or any AI assistant. To let an assistant query the API itself, use the [Odds-API.io MCP server](https://odds-api.io/mcp).
 
 ## Install
 

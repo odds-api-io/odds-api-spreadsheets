@@ -53,6 +53,12 @@ export function Settings() {
       <section class="list">
         <a class="list-row" href="https://docs.odds-api.io" target="_blank" rel="noopener"><span class="grow title">API documentation</span></a>
         <a class="list-row" href="https://odds-api.io/google-sheets" target="_blank" rel="noopener"><span class="grow title">Add-on guide</span></a>
+        <a class="list-row" href="https://odds-api.io/mcp" target="_blank" rel="noopener">
+          <span class="grow">
+            <span class="title" style={{ display: 'block' }}>Use with your AI assistant</span>
+            <span class="sub" style={{ display: 'block' }}>Connect ChatGPT or other assistants straight to the API</span>
+          </span>
+        </a>
         <a class="list-row" href="https://odds-api.io/privacy#google-sheets-addon" target="_blank" rel="noopener"><span class="grow title">Privacy</span></a>
         <a class="list-row" href="mailto:hello@odds-api.io" target="_blank" rel="noopener"><span class="grow title">Contact support</span></a>
       </section>
