@@ -1,0 +1,950 @@
+[
+ {
+  "path": "/arbitrage-bets",
+  "title": "Get arbitrage betting opportunities",
+  "group": "Arbitrage Bets",
+  "params": [
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated list of bookmakers (e.g. Bet365,SingBet)",
+    "example": "Bet365,SingBet"
+   },
+   {
+    "name": "sport",
+    "in": "query",
+    "required": false,
+    "description": "Filter by sport name or slug (e.g. Football or football)",
+    "example": "football"
+   },
+   {
+    "name": "league",
+    "in": "query",
+    "required": false,
+    "description": "Filter by league slug (e.g. england-premier-league). Requires sport to also be set.",
+    "example": "england-premier-league"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names to keep, case-insensitive (max 40)",
+    "example": "ML,Spread,Totals"
+   },
+   {
+    "name": "minProfit",
+    "in": "query",
+    "required": false,
+    "description": "Minimum profitMargin in percent, between 0 and 100 (e.g. 1.5 for 1.5%)",
+    "example": "1.5"
+   },
+   {
+    "name": "allCombinations",
+    "in": "query",
+    "required": false,
+    "description": "Return every bookmaker combination per event, market and line instead of only the best one (default false)",
+    "example": "false"
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "description": "Maximum number of results (default 50, max 500)",
+    "example": "50"
+   },
+   {
+    "name": "includeEventDetails",
+    "in": "query",
+    "required": false,
+    "description": "Include event details",
+    "example": "true"
+   }
+  ]
+ },
+ {
+  "path": "/bookmakers",
+  "title": "Get Bookmakers",
+  "group": "Bookmakers",
+  "params": []
+ },
+ {
+  "path": "/bookmakers/selected",
+  "title": "Get Selected Bookmakers",
+  "group": "Bookmakers",
+  "params": []
+ },
+ {
+  "path": "/events",
+  "title": "Get Events",
+  "group": "Events",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": true,
+    "description": "Sport name or slug (e.g. Football or football)",
+    "example": "football"
+   },
+   {
+    "name": "league",
+    "in": "query",
+    "required": false,
+    "description": "League slug (e.g. england-premier-league)",
+    "example": "england-premier-league"
+   },
+   {
+    "name": "participantId",
+    "in": "query",
+    "required": false,
+    "description": "Filter by participant ID (home or away)",
+    "example": "38"
+   },
+   {
+    "name": "status",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated event statuses (e.g. pending,live,settled,cancelled)",
+    "example": "pending,live"
+   },
+   {
+    "name": "from",
+    "in": "query",
+    "required": false,
+    "description": "Start date/time in RFC3339 format (e.g. 2025-10-28T10:00:00Z)",
+    "example": "2025-10-28T10:00:00Z"
+   },
+   {
+    "name": "to",
+    "in": "query",
+    "required": false,
+    "description": "End date/time in RFC3339 format (e.g. 2025-10-28T23:59:59Z). If omitted, defaults to 14 days from now.",
+    "example": "2025-10-28T23:59:59Z"
+   },
+   {
+    "name": "bookmaker",
+    "in": "query",
+    "required": false,
+    "description": "Filter by bookmaker name - returns only events that have odds available from this bookmaker (e.g. SingBet)",
+    "example": "SingBet"
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "description": "Maximum number of events to return. Every response is capped at 5000; use limit + skip to paginate larger ranges.",
+    "example": "20"
+   },
+   {
+    "name": "skip",
+    "in": "query",
+    "required": false,
+    "description": "Number of events to skip (for pagination)",
+    "example": "0"
+   }
+  ]
+ },
+ {
+  "path": "/events/live",
+  "title": "Get Live Events",
+  "group": "Events",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": false,
+    "description": "Sport name or slug to filter by (e.g. Football or football)",
+    "example": "football"
+   }
+  ]
+ },
+ {
+  "path": "/events/search",
+  "title": "Search Events",
+  "group": "Events",
+  "params": [
+   {
+    "name": "query",
+    "in": "query",
+    "required": true,
+    "description": "Search term (min 3 characters)",
+    "example": "Liverpool"
+   },
+   {
+    "name": "status",
+    "in": "query",
+    "required": false,
+    "description": "Which events to search: upcoming (default) or live",
+    "enum": [
+     "upcoming",
+     "live"
+    ]
+   }
+  ]
+ },
+ {
+  "path": "/events/{id}",
+  "title": "Get Event by ID",
+  "group": "Events",
+  "params": [
+   {
+    "name": "id",
+    "in": "path",
+    "required": true,
+    "description": "Event ID",
+    "example": "123456"
+   }
+  ]
+ },
+ {
+  "path": "/historical/events",
+  "title": "Get Historical Events",
+  "group": "Historical",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": true,
+    "description": "Sport name or slug (e.g. Football or football)",
+    "example": "football"
+   },
+   {
+    "name": "league",
+    "in": "query",
+    "required": true,
+    "description": "League slug (e.g. england-premier-league)",
+    "example": "england-premier-league"
+   },
+   {
+    "name": "from",
+    "in": "query",
+    "required": true,
+    "description": "Start date in RFC3339 format",
+    "example": "2026-01-01T00:00:00Z"
+   },
+   {
+    "name": "to",
+    "in": "query",
+    "required": true,
+    "description": "End date in RFC3339 format",
+    "example": "2026-01-31T23:59:59Z"
+   }
+  ]
+ },
+ {
+  "path": "/historical/events/search",
+  "title": "Search Historical Events",
+  "group": "Historical",
+  "params": [
+   {
+    "name": "query",
+    "in": "query",
+    "required": true,
+    "description": "Team name fragment, minimum 3 characters",
+    "example": "Brann"
+   },
+   {
+    "name": "sport",
+    "in": "query",
+    "required": false,
+    "description": "Sport name or slug (e.g. Football or football)",
+    "example": "football"
+   },
+   {
+    "name": "from",
+    "in": "query",
+    "required": false,
+    "description": "Start date in RFC3339 format",
+    "example": "2026-01-01T00:00:00Z"
+   },
+   {
+    "name": "to",
+    "in": "query",
+    "required": false,
+    "description": "End date in RFC3339 format",
+    "example": "2026-01-31T23:59:59Z"
+   }
+  ]
+ },
+ {
+  "path": "/historical/odds",
+  "title": "Get Historical Odds",
+  "group": "Historical",
+  "params": [
+   {
+    "name": "eventId",
+    "in": "query",
+    "required": true,
+    "description": "Event ID from /historical/events",
+    "example": "123456"
+   },
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated list of bookmaker names (max 30)",
+    "example": "Bet365,SingBet"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names to return (e.g. ML,Totals). Returns all markets when omitted.",
+    "example": "ML,Totals"
+   }
+  ]
+ },
+ {
+  "path": "/historical/closing-lines",
+  "title": "Get Historical Closing Lines",
+  "group": "Historical",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": true,
+    "description": "Sport name or slug (e.g. Football or football)",
+    "example": "football"
+   },
+   {
+    "name": "leagues",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated league slugs (max 10)",
+    "example": "england-premier-league,spain-laliga"
+   },
+   {
+    "name": "from",
+    "in": "query",
+    "required": true,
+    "description": "Start date in RFC3339 format",
+    "example": "2026-01-01T00:00:00Z"
+   },
+   {
+    "name": "to",
+    "in": "query",
+    "required": true,
+    "description": "End date in RFC3339 format. Maximum 366 days after from, so a full season fits in one sweep.",
+    "example": "2026-12-31T23:59:59Z"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated market names",
+    "example": "ML,Totals"
+   },
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated list of bookmaker names (max 30)",
+    "example": "Bet365,Unibet"
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "description": "Maximum number of events to return. Every response is capped at 100; use limit + skip to paginate.",
+    "example": "100"
+   },
+   {
+    "name": "skip",
+    "in": "query",
+    "required": false,
+    "description": "Number of events to skip (for pagination)",
+    "example": "0"
+   }
+  ]
+ },
+ {
+  "path": "/leagues",
+  "title": "Get Leagues",
+  "group": "Leagues",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": true,
+    "description": "Sport name or slug (e.g. Football or football)",
+    "example": "football"
+   },
+   {
+    "name": "all",
+    "in": "query",
+    "required": false,
+    "description": "If true, include leagues without active events",
+    "example": "false"
+   }
+  ]
+ },
+ {
+  "path": "/odds",
+  "title": "Get Event Odds",
+  "group": "Odds",
+  "params": [
+   {
+    "name": "eventId",
+    "in": "query",
+    "required": true,
+    "description": "Event ID",
+    "example": "123456"
+   },
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated list of bookmaker names (max 30)",
+    "example": "Bet365,Unibet"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names to keep, case-insensitive (max 40)",
+    "example": "ML,Spread,Totals"
+   },
+   {
+    "name": "includeSeq",
+    "in": "query",
+    "required": false,
+    "description": "Set to true to get the current WebSocket sequence number in the `X-OddsAPI-Seq` response header. Pass it as `lastSeq` when you open or reopen the WebSocket, so updates after this snapshot are replayed.",
+    "example": "true"
+   }
+  ]
+ },
+ {
+  "path": "/odds/movements",
+  "title": "Get Odds Movements",
+  "group": "Odds",
+  "params": [
+   {
+    "name": "eventId",
+    "in": "query",
+    "required": true,
+    "description": "Event ID",
+    "example": "123456"
+   },
+   {
+    "name": "bookmaker",
+    "in": "query",
+    "required": true,
+    "description": "Bookmaker name, case-insensitive (e.g. Bet365, SingBet, Bet365 (no latency))"
+   },
+   {
+    "name": "market",
+    "in": "query",
+    "required": true,
+    "description": "Market name, case-insensitive (e.g. ML, Spread, Totals, Both Teams To Score)"
+   },
+   {
+    "name": "marketLine",
+    "in": "query",
+    "required": false,
+    "description": "Handicap line (e.g. 0.5, -1.25, 2.5). Leave it out for the main line of Spread and Totals markets, where each entry's hdp shows the line at that time, or for markets without a line (ML, Draw No Bet, Both Teams To Score)"
+   }
+  ]
+ },
+ {
+  "path": "/odds/multi",
+  "title": "Get Odds for Multiple Events",
+  "group": "Odds",
+  "params": [
+   {
+    "name": "eventIds",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated list of up to 10 Event IDs"
+   },
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated list of bookmaker names (max 30)"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names to keep, case-insensitive (max 40)",
+    "example": "ML,Spread,Totals"
+   },
+   {
+    "name": "includeSeq",
+    "in": "query",
+    "required": false,
+    "description": "Set to true to get the current WebSocket sequence number in the `X-OddsAPI-Seq` response header. Pass it as `lastSeq` when you open or reopen the WebSocket, so updates after this snapshot are replayed.",
+    "example": "true"
+   }
+  ]
+ },
+ {
+  "path": "/odds/updated",
+  "title": "Get updated event odds since a given timestamp",
+  "group": "Odds",
+  "params": [
+   {
+    "name": "since",
+    "in": "query",
+    "required": true,
+    "description": "Unix timestamp (max 90 seconds old)"
+   },
+   {
+    "name": "bookmaker",
+    "in": "query",
+    "required": true,
+    "description": "Bookmaker name (e.g. Bet365). The response uses the same name; `bookmaker=Bet365` also returns a `Bet365 (no latency)` key, as `/odds/multi` does."
+   },
+   {
+    "name": "sport",
+    "in": "query",
+    "required": true,
+    "description": "Sport name (e.g. Football)"
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "description": "Max events to return (default and maximum 10000)"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names to keep, case-insensitive (max 40). Required from 19 October 2026: a call without it, or where none of the names exist, returns 400. Valid names: /v3/markets?sport=<sport>",
+    "example": "ML,Spread,Totals"
+   }
+  ]
+ },
+ {
+  "path": "/participants",
+  "title": "Get Participants",
+  "group": "Participants",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": true,
+    "description": "Sport name or slug (e.g. Football or football)",
+    "example": "football"
+   },
+   {
+    "name": "search",
+    "in": "query",
+    "required": false,
+    "description": "Search term to filter by name",
+    "example": "Chelsea"
+   }
+  ]
+ },
+ {
+  "path": "/participants/{id}",
+  "title": "Get Participant by ID",
+  "group": "Participants",
+  "params": [
+   {
+    "name": "id",
+    "in": "path",
+    "required": true,
+    "description": "Participant ID",
+    "example": "38"
+   }
+  ]
+ },
+ {
+  "path": "/sports",
+  "title": "Get Sports",
+  "group": "Sports",
+  "params": []
+ },
+ {
+  "path": "/dropping-odds",
+  "title": "Get Dropping Odds",
+  "group": "Dropping Odds",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": false,
+    "description": "Sport name or slug (e.g. Football or football)",
+    "example": "football"
+   },
+   {
+    "name": "league",
+    "in": "query",
+    "required": false,
+    "description": "League slug (e.g. england-premier-league). Requires sport param. Mutually exclusive with leagues.",
+    "example": "england-premier-league"
+   },
+   {
+    "name": "leagues",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated league slugs to filter by multiple leagues at once (e.g. england-premier-league,spain-laliga). Mutually exclusive with league.",
+    "example": "england-premier-league,spain-laliga"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names to filter by (case-insensitive). Supported: ML, Spread, Totals, Spread HT, Totals HT, Totals 1Q, Spread 1Q, Team Total Home, Team Total Away, First 5 Innings ML, First 5 Innings Spread, First",
+    "example": "Spread,Totals"
+   },
+   {
+    "name": "timeWindow",
+    "in": "query",
+    "required": false,
+    "description": "Time window for drop filtering and sorting. Default: opening",
+    "example": "opening",
+    "enum": [
+     "opening",
+     "12h",
+     "24h",
+     "48h"
+    ]
+   },
+   {
+    "name": "sort",
+    "in": "query",
+    "required": false,
+    "description": "Sort order: `drop` (highest drop % for the selected time window), `recent` (latest movement first) or `kickoff` (soonest event first). Default: drop",
+    "example": "drop",
+    "enum": [
+     "drop",
+     "recent",
+     "kickoff"
+    ]
+   },
+   {
+    "name": "minDrop",
+    "in": "query",
+    "required": false,
+    "description": "Minimum drop percentage for the selected time window. Default: 0",
+    "example": "5"
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "description": "Maximum results per page (default 50, max 200)",
+    "example": "50"
+   },
+   {
+    "name": "page",
+    "in": "query",
+    "required": false,
+    "description": "Page number, 1-indexed (default 1)",
+    "example": "1"
+   },
+   {
+    "name": "includeEventDetails",
+    "in": "query",
+    "required": false,
+    "description": "Include event details (home, away, date, sport, league). Default: false",
+    "example": "true"
+   }
+  ]
+ },
+ {
+  "path": "/value-bets",
+  "title": "Get Value Bets",
+  "group": "Value Bets",
+  "params": [
+   {
+    "name": "bookmaker",
+    "in": "query",
+    "required": true,
+    "description": "Bookmaker name (e.g. Bet365)",
+    "example": "Bet365"
+   },
+   {
+    "name": "sport",
+    "in": "query",
+    "required": false,
+    "description": "Filter by sport name or slug (e.g. Baseball or baseball). Optional.",
+    "example": "baseball"
+   },
+   {
+    "name": "league",
+    "in": "query",
+    "required": false,
+    "description": "Filter by league slug (e.g. usa-mlb). Requires sport to also be set.",
+    "example": "usa-mlb"
+   },
+   {
+    "name": "includeEventDetails",
+    "in": "query",
+    "required": false,
+    "description": "Include event details",
+    "example": "true"
+   }
+  ]
+ },
+ {
+  "path": "/mappings",
+  "title": "Get Native ID Mappings",
+  "group": "Mappings",
+  "params": [
+   {
+    "name": "bookmaker",
+    "in": "query",
+    "required": true,
+    "description": "Bookmaker name",
+    "example": "Polymarket"
+   },
+   {
+    "name": "eventId",
+    "in": "query",
+    "required": false,
+    "description": "Our event id. Returns every mapping of this event.",
+    "example": "71515842"
+   },
+   {
+    "name": "eventIds",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated list of up to 10 of our event ids. Use instead of `eventId`.",
+    "example": "71515842,71515900"
+   },
+   {
+    "name": "marketId",
+    "in": "query",
+    "required": false,
+    "description": "The bookmaker's market id (Polymarket conditionId, Kalshi contract ticker). Can be combined with `outcomeId`."
+   },
+   {
+    "name": "marketIds",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated list of up to 10 bookmaker market ids. Use instead of `marketId`; can be combined with `outcomeId`.",
+    "example": "KXNFLGAME-26OCT04BUFNE-BUF,KXNFLGAME-26OCT04BUFNE-NE"
+   },
+   {
+    "name": "outcomeId",
+    "in": "query",
+    "required": false,
+    "description": "The bookmaker's outcome id (Polymarket CLOB token id, Kalshi `yes` or `no`). For Kalshi, pass it together with `marketId`."
+   },
+   {
+    "name": "market",
+    "in": "query",
+    "required": false,
+    "description": "Only this market, by its exact name as served in `/v3/odds` (case-sensitive).",
+    "example": "Spread"
+   },
+   {
+    "name": "active",
+    "in": "query",
+    "required": false,
+    "description": "`true` for outcomes the bookmaker still lists, `false` for withdrawn ones. Default: both.",
+    "enum": [
+     "true",
+     "false"
+    ]
+   },
+   {
+    "name": "sport",
+    "in": "query",
+    "required": false,
+    "description": "Bulk sync only: sport slug or name.",
+    "example": "american-football"
+   },
+   {
+    "name": "league",
+    "in": "query",
+    "required": false,
+    "description": "Bulk sync only: league slug. Requires `sport`.",
+    "example": "usa-nfl"
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "description": "Bulk sync only: rows per page."
+   },
+   {
+    "name": "cursor",
+    "in": "query",
+    "required": false,
+    "description": "Bulk sync only: the `nextCursor` of the previous page."
+   }
+  ]
+ },
+ {
+  "path": "/markets",
+  "title": "Get Markets",
+  "group": "Markets",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": false,
+    "description": "Sport name or slug (e.g. Football or football). Omit for all sports keyed by slug.",
+    "example": "football"
+   }
+  ]
+ },
+ {
+  "path": "/odds/summary",
+  "title": "Get Odds Summary",
+  "group": "Odds",
+  "params": [
+   {
+    "name": "eventId",
+    "in": "query",
+    "required": true,
+    "description": "Event ID",
+    "example": "123456"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names, case-insensitive (default ML,Spread,Totals, max 20)"
+   },
+   {
+    "name": "lines",
+    "in": "query",
+    "required": false,
+    "description": "main (default) returns each ladder market's main line; all returns every line priced by at least 3 bookmakers"
+   },
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": false,
+    "description": "Restrict the summary to these bookmakers. Each must be in your selected bookmakers"
+   },
+   {
+    "name": "includeExchanges",
+    "in": "query",
+    "required": false,
+    "description": "Add the best exchange back price per outcome in a separate exchanges block"
+   }
+  ]
+ },
+ {
+  "path": "/odds/summary/multi",
+  "title": "Get Odds Summary for Multiple Events",
+  "group": "Odds",
+  "params": [
+   {
+    "name": "eventIds",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated event IDs, up to 10"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names, case-insensitive (default ML,Spread,Totals, max 20)"
+   },
+   {
+    "name": "lines",
+    "in": "query",
+    "required": false,
+    "description": "main (default) or all"
+   },
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": false,
+    "description": "Restrict the summary to these bookmakers. Each must be in your selected bookmakers"
+   },
+   {
+    "name": "includeExchanges",
+    "in": "query",
+    "required": false,
+    "description": "Add the best exchange back price per outcome in a separate exchanges block"
+   }
+  ]
+ },
+ {
+  "path": "/outrights",
+  "title": "List Outrights",
+  "group": "Outrights",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": true,
+    "description": "Sport name or slug",
+    "example": "golf"
+   },
+   {
+    "name": "league",
+    "in": "query",
+    "required": false,
+    "description": "League slug: pga-tour, dp-world-tour, liv-golf or majors",
+    "example": "pga-tour"
+   },
+   {
+    "name": "status",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated statuses: pending, live, settled, cancelled. Default: pending,live",
+    "example": "pending,live"
+   },
+   {
+    "name": "kind",
+    "in": "query",
+    "required": false,
+    "description": "race or standings. Omit for both.",
+    "example": "race",
+    "enum": [
+     "race",
+     "standings"
+    ]
+   }
+  ]
+ },
+ {
+  "path": "/outrights/odds",
+  "title": "Get Outright Odds",
+  "group": "Outrights",
+  "params": [
+   {
+    "name": "id",
+    "in": "query",
+    "required": true,
+    "description": "Outright id from /outrights",
+    "example": "1001"
+   },
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated list of bookmaker names (max 30)",
+    "example": "DraftKings,Kalshi"
+   }
+  ]
+ },
+ {
+  "path": "/outrights/results",
+  "title": "Get Outright Results",
+  "group": "Outrights",
+  "params": [
+   {
+    "name": "id",
+    "in": "query",
+    "required": true,
+    "description": "Outright id from /outrights",
+    "example": "1000"
+   }
+  ]
+ },
+ {
+  "path": "/settlements",
+  "title": "Get Settlements",
+  "group": "Settlement",
+  "params": [
+   {
+    "name": "eventIds",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated event ids (1 to 50)",
+    "example": "74919888,73722728"
+   }
+  ]
+ }
+]

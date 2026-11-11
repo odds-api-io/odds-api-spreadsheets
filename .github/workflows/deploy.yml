@@ -1,0 +1,72 @@
+name: Deploy Google Sheets add-on
+
+on:
+  push:
+    branches: [main]
+    paths: [pane/**, sheets/**, scripts/**, package.json, package-lock.json, vite.config.ts]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-sheets
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    if: vars.SHEETS_SCRIPT_ID != ''
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: Configure clasp
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ vars.SHEETS_SCRIPT_ID }}
+        run: |
+          printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
+          printf '{"scriptId":"%s","rootDir":"src"}' "$SCRIPT_ID" > sheets/.clasp.json
+      - name: Push code to Apps Script
+        working-directory: sheets
+        run: npx clasp push --force
+      - name: Create version
+        id: version
+        working-directory: sheets
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          description="${GITHUB_SHA::7} ${COMMIT_MESSAGE%%$'\n'*}"
+          number=$(npx clasp create-version "${description:0:100}" --json | jq -r '.versionNumber')
+          [[ "$number" =~ ^[0-9]+$ ]] || { echo "Could not read the new version number"; exit 1; }
+          echo "Created version $number"
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+  go-live:
+    needs: version
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Configure clasp
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ vars.SHEETS_SCRIPT_ID }}
+        run: |
+          printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
+          printf '{"scriptId":"%s","rootDir":"src"}' "$SCRIPT_ID" > sheets/.clasp.json
+      - name: Point the production deployment at the new version
+        working-directory: sheets
+        run: npx clasp update-deployment "${{ vars.SHEETS_DEPLOYMENT_ID }}" --versionNumber "${{ needs.version.outputs.version }}" --description "${GITHUB_SHA::7}"

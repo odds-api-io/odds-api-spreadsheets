@@ -1,0 +1,42 @@
+{
+  "name": "odds-api-spreadsheets",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Odds-API.io add-ons for Google Sheets (and soon Excel): live odds, best prices, arbitrage, value bets and the full API in your spreadsheet.",
+  "homepage": "https://odds-api.io/google-sheets",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/odds-api-io/odds-api-spreadsheets.git"
+  },
+  "bugs": {
+    "url": "https://github.com/odds-api-io/odds-api-spreadsheets/issues"
+  },
+  "author": "Odds-API.io <hello@odds-api.io>",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/build-sidebar.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test && npm run build",
+    "catalogue": "node scripts/catalogue.mjs",
+    "catalogue:check": "node scripts/catalogue.mjs --check",
+    "push:sheets": "npm run build && clasp push --force"
+  },
+  "dependencies": {
+    "@preact/signals": "2.11.4",
+    "preact": "11.1.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "2.10.6",
+    "typescript": "5.9.3",
+    "vite": "8.3.5",
+    "vite-plugin-singlefile": "2.3.4",
+    "vitest": "4.1.12",
+    "@google/clasp": "3.4.1"
+  }
+}

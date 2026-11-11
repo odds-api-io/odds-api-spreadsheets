@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.local
+.clasp.json
+.clasprc.json
+sheets/src/Sidebar.html
+.DS_Store
