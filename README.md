@@ -56,7 +56,7 @@ The API catalogue in `pane/src/api/endpoints.json` is generated from the publish
 
 ## Releases
 
-Every merge to `main` runs [deploy.yml](.github/workflows/deploy.yml): it checks the code, pushes it to the Apps Script project and creates a numbered version. The `go-live` job then waits for approval in the `production` environment before moving the Marketplace deployment to that version.
+Every merge to `main` runs [deploy.yml](.github/workflows/deploy.yml): it checks the code, pushes it to the Apps Script project and creates a numbered version. The run summary shows the version number. To release it, set **Sheets add-on script version** to that number in Google Cloud console > Google Workspace Marketplace SDK > App Configuration.
 
 Repository settings it needs:
 
@@ -64,7 +64,6 @@ Repository settings it needs:
 | --- | --- | --- |
 | `CLASPRC_JSON` | secret | contents of `~/.clasprc.json` after `clasp login` with the publishing account |
 | `SHEETS_SCRIPT_ID` | variable | Apps Script project ID |
-| `SHEETS_DEPLOYMENT_ID` | variable | ID of the versioned deployment the Marketplace listing uses |
 
 Changes to OAuth scopes or the store listing need a new Marketplace review; code changes alone do not.
 

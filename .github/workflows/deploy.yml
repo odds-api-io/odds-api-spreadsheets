@@ -48,25 +48,8 @@ jobs:
           [[ "$number" =~ ^[0-9]+$ ]] || { echo "Could not read the new version number"; exit 1; }
           echo "Created version $number"
           echo "number=$number" >> "$GITHUB_OUTPUT"
-
-  go-live:
-    needs: version
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - name: Configure clasp
-        env:
-          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
-          SCRIPT_ID: ${{ vars.SHEETS_SCRIPT_ID }}
-        run: |
-          printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
-          printf '{"scriptId":"%s","rootDir":"src"}' "$SCRIPT_ID" > sheets/.clasp.json
-      - name: Point the production deployment at the new version
-        working-directory: sheets
-        run: npx clasp update-deployment "${{ vars.SHEETS_DEPLOYMENT_ID }}" --versionNumber "${{ needs.version.outputs.version }}" --description "${GITHUB_SHA::7}"
+          {
+            echo "### Apps Script version $number is ready"
+            echo "To release it, open Google Cloud console > Google Workspace Marketplace SDK > App Configuration,"
+            echo "set **Sheets add-on script version** to **$number** and save."
+          } >> "$GITHUB_STEP_SUMMARY"
