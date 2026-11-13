@@ -206,7 +206,7 @@ function oddsLines_(event, market, bookmaker) {
  * @param {number} eventId Event ID (copy it from the Odds-API sidebar).
  * @param {string} market Optional market name, for example "ML", "Spread" or "Totals".
  * @param {string} bookmaker Optional bookmaker name, for example "Bet365".
- * @param {any} refresh Optional changing value (for example a cell with =NOW()) to fetch fresh odds.
+ * @param {any} refresh Optional cell you change (for example a checkbox) to fetch fresh odds.
  * @return Odds table with a header row.
  * @customfunction
  */
@@ -236,7 +236,7 @@ function ODDS(eventId, market, bookmaker, refresh) {
  * @param {string} sport Sport slug, for example "football".
  * @param {string} league Optional league slug, for example "england-premier-league".
  * @param {string} market Optional market, default "ML".
- * @param {any} refresh Optional changing value to fetch fresh prices.
+ * @param {any} refresh Optional cell you change (for example a checkbox) to fetch fresh prices.
  * @return Table with a header row.
  * @customfunction
  */

@@ -23,7 +23,7 @@ You need an Odds-API.io API key ([see plans](https://odds-api.io/pricing)). The 
 | `=ODDS(eventId, [market], [bookmaker], [refresh])` | One row per bookmaker, line and selection for an event |
 | `=ODDS_TABLE(sport, [league], [market], [refresh])` | Upcoming events with the best price per selection |
 
-Sheets caches formula results, so pass a changing value as `refresh` (for example a cell containing `=NOW()`) to fetch new prices. `ODDS_GET_ML`, `ODDS_GET_SPREAD` and `ODDS_GET_TOTALS` from version 1 keep working.
+Sheets caches formula results, so pass a cell you change as `refresh` (a checkbox works well) and change it to fetch new prices. Sheets does not allow `=NOW()` or `=RAND()` here. `ODDS_GET_ML`, `ODDS_GET_SPREAD` and `ODDS_GET_TOTALS` from version 1 keep working.
 
 ## Project layout
 
