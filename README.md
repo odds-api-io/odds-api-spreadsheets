@@ -10,7 +10,7 @@ Live odds from 450+ bookmakers in Google Sheets, from the [Odds-API.io](https://
 
 ## Install
 
-1. Open the [Odds-API listing on the Google Workspace Marketplace](https://odds-api.io/google-sheets) and click **Install**.
+1. Open the [Odds-API.io: Sports Odds for Sheets listing on the Google Workspace Marketplace](https://workspace.google.com/marketplace/app/oddsapiio_sports_odds_for_sheets/1024703542441) and click **Install**.
 2. In any spreadsheet, open **Extensions > Odds-API.io > Open**.
 3. Paste your API key. Done.
 
