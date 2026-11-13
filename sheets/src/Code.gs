@@ -4,7 +4,7 @@ var FILTER_ICON_PX = 28;
 var NOT_SELECTIONS = { hdp: 1, label: 1, max: 1 };
 var POPULAR_BOOKMAKERS = ['Bet365', 'Unibet', 'William Hill', 'Betfair Exchange', 'DraftKings', 'FanDuel', '1xbet', 'Betano', 'BetMGM', 'Betway', 'Bwin', 'Stake'];
 var NO_KEY = 'Add your API key: Extensions > Odds-API.io > Open';
-var NUMBER_FORMATS = { odds: '0.00', percent: '0.00"%"', datetime: 'yyyy-mm-dd hh:mm', id: '0', number: '0.##' };
+var NUMBER_FORMATS = { odds: '0.00', percent: '0.00%', datetime: 'yyyy-mm-dd hh:mm', id: '0', number: '0.##' };
 
 function onOpen() {
   SpreadsheetApp.getUi().createAddonMenu().addItem('Open', 'showSidebar').addToUi();
@@ -63,6 +63,7 @@ function freeSheetName_(ss, name) {
 
 function toCell_(value, type) {
   if (value === null || value === undefined) return '';
+  if (type === 'percent' && typeof value === 'number') return value / 100;
   if (type === 'datetime' && typeof value === 'string') {
     var d = new Date(value);
     return isNaN(d.getTime()) ? value : d;

@@ -283,7 +283,14 @@ export function Picker({ label, value, placeholder, onOpen }: { label: string; v
   )
 }
 
-export function Progress({ value }: { value: number }) {
+export function Progress({ value }: { value: number | null }) {
+  if (value === null) {
+    return (
+      <div class="progress indeterminate" role="progressbar" aria-valuemin={0} aria-valuemax={100}>
+        <span />
+      </div>
+    )
+  }
   return (
     <div class="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(value * 100)}>
       <span style={{ width: `${Math.max(4, value * 100)}%` }} />

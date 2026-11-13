@@ -102,8 +102,12 @@ export function InsertLayer() {
       )}
       {prog && prog.total > 0 && (
         <div class="writing" role="status">
-          <div class="small">Writing {prog.done.toLocaleString()} of {prog.total.toLocaleString()} rows</div>
-          <Progress value={prog.done / prog.total} />
+          <div class="small">
+            {prog.done === 0
+              ? `Writing ${prog.total.toLocaleString()} rows…`
+              : `Writing ${prog.done.toLocaleString()} of ${prog.total.toLocaleString()} rows`}
+          </div>
+          <Progress value={prog.done === 0 ? null : prog.done / prog.total} />
         </div>
       )}
     </>
