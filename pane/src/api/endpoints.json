@@ -240,7 +240,7 @@
     "name": "query",
     "in": "query",
     "required": true,
-    "description": "Team name fragment, minimum 3 characters",
+    "description": "Team name fragment, 3 to 50 characters",
     "example": "Brann"
    },
    {
@@ -505,7 +505,7 @@
     "name": "limit",
     "in": "query",
     "required": false,
-    "description": "Max events to return (default and maximum 10000)"
+    "description": "Max events to return (default and maximum 10000), except that events changed within the same second as `since` are always returned together, so paging never stalls or skips one"
    },
    {
     "name": "markets",
@@ -944,6 +944,62 @@
     "required": true,
     "description": "Comma-separated event ids (1 to 50)",
     "example": "74919888,73722728"
+   }
+  ]
+ },
+ {
+  "path": "/sgp/bookmakers",
+  "title": "List Same Game Parlay Bookmakers",
+  "group": "Same Game Parlays",
+  "params": [
+   {
+    "name": "sport",
+    "in": "query",
+    "required": false,
+    "description": "Sport slug from /sports",
+    "example": "basketball"
+   }
+  ]
+ },
+ {
+  "path": "/sgp/legs",
+  "title": "List Same Game Parlay Legs",
+  "group": "Same Game Parlays",
+  "params": [
+   {
+    "name": "eventId",
+    "in": "query",
+    "required": true,
+    "description": "Event ID from /events",
+    "example": "61234567"
+   },
+   {
+    "name": "bookmakers",
+    "in": "query",
+    "required": true,
+    "description": "Comma-separated bookmaker names (max 8); spaces around names are ignored",
+    "example": "DraftKings"
+   },
+   {
+    "name": "markets",
+    "in": "query",
+    "required": false,
+    "description": "Comma-separated market names to keep, case-insensitive (max 40)",
+    "example": "ML,Spread,Totals"
+   },
+   {
+    "name": "limit",
+    "in": "query",
+    "required": false,
+    "description": "Maximum number of legs to return (default 200, max 1000)",
+    "example": "200"
+   },
+   {
+    "name": "skip",
+    "in": "query",
+    "required": false,
+    "description": "Number of legs to skip (for pagination)",
+    "example": "0"
    }
   ]
  }
