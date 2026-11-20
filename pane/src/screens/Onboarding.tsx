@@ -44,7 +44,7 @@ export function Onboarding() {
           <div class="price"><span class="price-sel">Draw</span><span class="price-num">3.45</span><span class="price-book">best of 209</span></div>
           <div class="price"><span class="price-sel">Away</span><span class="price-num">3.90</span><span class="price-book">best of 212</span></div>
         </div>
-        <h2 class="onboard-title">Odds from 450+ bookmakers, straight into your sheet</h2>
+        <h2 class="onboard-title">Odds from 500+ bookmakers, straight into your sheet</h2>
         <p class="lede">Compare prices, pull history and build sheets your AI assistant can analyse.</p>
       </div>
       <Field label="API key" id="api-key" error={error} hint={<>Find it on your <a href="https://odds-api.io/dashboard" target="_blank" rel="noopener">Odds-API dashboard</a>.</>}>

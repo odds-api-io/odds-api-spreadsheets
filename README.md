@@ -1,6 +1,6 @@
 # Odds-API.io: Sports Odds for Sheets
 
-Live odds from 450+ bookmakers in Google Sheets, from the [Odds-API.io](https://odds-api.io) team. An Excel version is on the way.
+Live odds from 500+ bookmakers in Google Sheets, from the [Odds-API.io](https://odds-api.io) team. An Excel version is on the way.
 
 - **Explore**: search a team or league, see the best price per market across bookmakers, the fair price and line movement, then insert it as a sheet.
 - **Recipes**: one click builds a clean sheet of best prices, arbitrage, value bets or dropping odds, with optional refresh every minute.
