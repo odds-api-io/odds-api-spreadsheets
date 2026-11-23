@@ -46,6 +46,7 @@ function fakeSheet(name: string) {
 function load(props: Props = {}, body: unknown = odds, status = 200) {
   const sheets: Record<string, any> = {}
   const fetched: string[] = []
+  const fetchOpts: any[] = []
   const ss = {
     getSheetByName: (n: string) => sheets[n] ?? null,
     insertSheet: (n: string) => (sheets[n] = fakeSheet(n)),
@@ -53,10 +54,10 @@ function load(props: Props = {}, body: unknown = odds, status = 200) {
     getNamedRanges: () => [],
   }
   const ctx: any = {
-    sheets, fetched,
+    sheets, fetched, fetchOpts,
     PropertiesService: { getUserProperties: () => ({ getProperty: (k: string) => props[k] ?? null, setProperty: (k: string, v: string) => (props[k] = v), deleteProperty: (k: string) => delete props[k] }) },
     CacheService: { getUserCache: () => ({ get: () => null, put: () => {} }) },
-    UrlFetchApp: { fetch: (url: string) => (fetched.push(url), { getResponseCode: () => status, getContentText: () => JSON.stringify(typeof body === 'function' ? (body as any)(url) : body) }) },
+    UrlFetchApp: { fetch: (url: string, opts?: any) => (fetched.push(url), fetchOpts.push(opts), { getResponseCode: () => status, getContentText: () => JSON.stringify(typeof body === 'function' ? (body as any)(url) : body) }) },
     SpreadsheetApp: { getActiveSpreadsheet: () => ss, getUi: () => ({}) },
     Utilities: { formatDate: () => '' },
     console,
@@ -96,7 +97,7 @@ describe('custom functions', () => {
   it('legacy ODDS_GET_ML still works', () => {
     expect(load({ settings: JSON.stringify({ apiKey: 'k' }) }, api).ODDS_GET_ML(72221406)[0][1]).toBe('market')
   })
-  it('tags every formula request with client=sheets-formula and keeps it out of the cache key', () => {
+  it('tags every formula request with the X-Odds-Api-Client header and keeps cache keys unchanged', () => {
     const ctx = load({ settings: JSON.stringify({ apiKey: 'k' }) }, (url: string) =>
       url.includes('/bookmakers/selected') ? selected : url.includes('/events?') ? events : url.includes('/odds/summary/multi') ? [summary] : odds,
     )
@@ -107,7 +108,8 @@ describe('custom functions', () => {
     ctx.ODDS_TABLE('football', 'england-premier-league')
     ctx.ODDS_GET_ML(72221406)
     expect(ctx.fetched.length).toBeGreaterThan(3)
-    for (const u of ctx.fetched) expect(new URL(u).searchParams.get('client')).toBe('sheets-formula')
+    for (const u of ctx.fetched) expect(new URL(u).searchParams.has('client')).toBe(false)
+    for (const o of ctx.fetchOpts) expect(o.headers).toEqual({ 'X-Odds-Api-Client': 'sheets-formula' })
     expect(keys).toContain('f:/odds?eventId=72221406&bookmakers=Bet365')
     for (const k of keys) expect(k).not.toMatch(/client=|apiKey=/)
   })

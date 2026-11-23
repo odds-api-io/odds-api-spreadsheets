@@ -13,16 +13,11 @@ describe('ApiClient', () => {
     )
   })
 
-  it('tags every request with client=sheets-panel', async () => {
+  it('sends requests untagged, with no client param or custom headers', async () => {
     const f = vi.fn().mockResolvedValue(res(200, []))
     await new ApiClient(KEY, f).get('/odds', { eventId: 1 })
-    expect(String(f.mock.calls[0][0])).toBe(`https://api.odds-api.io/v3/odds?eventId=1&client=sheets-panel&apiKey=${KEY}`)
-  })
-
-  it('keeps the client tag out of the display url', () => {
-    const c = new ApiClient(KEY)
-    expect(c.url('/odds', { eventId: 1 }, true)).toBe('https://api.odds-api.io/v3/odds?eventId=1&apiKey=aaaa…c57f')
-    expect(c.url('/odds', { eventId: 1 })).not.toContain('client=')
+    expect(f.mock.calls[0]).toEqual([`https://api.odds-api.io/v3/odds?eventId=1&apiKey=${KEY}`])
+    expect(String(f.mock.calls[0][0])).not.toContain('client=')
   })
 
   it('masks the key in display urls and text', () => {

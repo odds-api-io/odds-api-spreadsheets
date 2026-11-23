@@ -143,7 +143,7 @@ function finishTable_(ss, sheet, p, lastRow) {
 }
 
 function requestUrl_(path, query, key) {
-  return API_BASE + path + '?' + query.concat(['client=' + REQUEST_CLIENT, 'apiKey=' + encodeURIComponent(key)]).join('&');
+  return API_BASE + path + '?' + query.concat(['apiKey=' + encodeURIComponent(key)]).join('&');
 }
 
 function fetchJson_(path, params) {
@@ -161,7 +161,7 @@ function fetchJson_(path, params) {
 
   var res;
   try {
-    res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, headers: { 'X-Odds-Api-Client': REQUEST_CLIENT } });
   } catch (err) {
     return { error: 'Odds-API: request failed, try again in a moment' };
   }
