@@ -10,7 +10,7 @@ describe('verifyKey', () => {
     const r = await verifyKey('  abc\n', f)
     expect(r.key).toBe('abc')
     expect(r.bookmakers.length).toBe(selected.bookmakers.length)
-    expect(String(f.mock.calls[0][0])).toContain('/bookmakers/selected?apiKey=abc')
+    expect(String(f.mock.calls[0][0])).toContain('/bookmakers/selected?client=sheets-panel&apiKey=abc')
   })
   it('rejects an empty key without calling the API', async () => {
     const f = ok(selected)

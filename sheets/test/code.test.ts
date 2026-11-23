@@ -96,6 +96,21 @@ describe('custom functions', () => {
   it('legacy ODDS_GET_ML still works', () => {
     expect(load({ settings: JSON.stringify({ apiKey: 'k' }) }, api).ODDS_GET_ML(72221406)[0][1]).toBe('market')
   })
+  it('tags every formula request with client=sheets-formula and keeps it out of the cache key', () => {
+    const ctx = load({ settings: JSON.stringify({ apiKey: 'k' }) }, (url: string) =>
+      url.includes('/bookmakers/selected') ? selected : url.includes('/events?') ? events : url.includes('/odds/summary/multi') ? [summary] : odds,
+    )
+    const keys: string[] = []
+    ctx.CacheService = { getUserCache: () => ({ get: (k: string) => (keys.push(k), null), put: () => {} }) }
+    ctx.ODDS(72221406, 'ML')
+    ctx.ODDS(72221406, 'ML', 'Bet365')
+    ctx.ODDS_TABLE('football', 'england-premier-league')
+    ctx.ODDS_GET_ML(72221406)
+    expect(ctx.fetched.length).toBeGreaterThan(3)
+    for (const u of ctx.fetched) expect(new URL(u).searchParams.get('client')).toBe('sheets-formula')
+    expect(keys).toContain('f:/odds?eventId=72221406&bookmakers=Bet365')
+    for (const k of keys) expect(k).not.toMatch(/client=|apiKey=/)
+  })
   it('ODDS_TABLE joins events with best prices', () => {
     const ctx = load({ settings: JSON.stringify({ apiKey: 'k' }) }, (url: string) => (url.includes('/events?') ? events : [summary]))
     const out = ctx.ODDS_TABLE('football', 'england-premier-league', 'ML')

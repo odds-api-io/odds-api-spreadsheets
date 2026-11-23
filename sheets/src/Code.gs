@@ -1,4 +1,5 @@
 var API_BASE = 'https://api.odds-api.io/v3';
+var REQUEST_CLIENT = 'sheets-formula';
 var CHUNK_NOTE_COL_GAP = 2;
 var FILTER_ICON_PX = 28;
 var NOT_SELECTIONS = { hdp: 1, label: 1, max: 1 };
@@ -141,6 +142,10 @@ function finishTable_(ss, sheet, p, lastRow) {
   sheet.activate();
 }
 
+function requestUrl_(path, query, key) {
+  return API_BASE + path + '?' + query.concat(['client=' + REQUEST_CLIENT, 'apiKey=' + encodeURIComponent(key)]).join('&');
+}
+
 function fetchJson_(path, params) {
   var key = (readSettings_().apiKey || '').trim();
   if (!key) return { error: NO_KEY };
@@ -148,10 +153,9 @@ function fetchJson_(path, params) {
   for (var k in params) {
     if (params[k] !== undefined && params[k] !== null && params[k] !== '') query.push(k + '=' + encodeURIComponent(params[k]));
   }
-  query.push('apiKey=' + encodeURIComponent(key));
-  var url = API_BASE + path + '?' + query.join('&');
+  var url = requestUrl_(path, query, key);
   var cache = CacheService.getUserCache();
-  var cacheKey = 'f:' + path + '?' + query.slice(0, -1).join('&');
+  var cacheKey = 'f:' + path + '?' + query.join('&');
   var hit = cacheKey.length < 240 ? cache.get(cacheKey) : null;
   if (hit) return { data: JSON.parse(hit) };
 
