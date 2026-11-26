@@ -9,7 +9,7 @@ import movements from './fixtures/movements.json'
 import settlements from './fixtures/settlements.json'
 import closing from './fixtures/closing.json'
 import {
-  eventsTable, oddsTable, bestPricesFromOdds, bestPricesFromSummary, bestPricesTable, arbsTable, valueBetsTable,
+  eventsTable, oddsTable, marketOddsTable, onlyMarket, bestPricesFromOdds, bestPricesFromSummary, bestPricesTable, arbsTable, valueBetsTable,
   droppingTable, movementsTable, settlementsTable, genericTable, toCsv, aiPrompt, sheetName, type Table,
 } from '../src/shape'
 
@@ -156,5 +156,25 @@ describe('review fixes', () => {
   })
   it('sheet names never start or end with a quote', () => {
     expect(sheetName("'Odds'")).toBe('Odds')
+  })
+})
+
+describe('marketOddsTable', () => {
+  const o = odds as any
+  const marketsOf = (t: any) => new Set(t.rows.map((r: unknown[]) => r[t.headers.indexOf('market')]))
+  it('keeps only the chosen market and names the sheet after it', () => {
+    const t = marketOddsTable(o, 'Totals', 's')
+    expect(marketsOf(t)).toEqual(new Set(['Totals']))
+    expect(t.name).toBe(`Odds Totals ${o.home} v ${o.away}`.slice(0, 50))
+    expect(t.notes[0]).toBe('Market: Totals.')
+    expect(new Set(t.rows.map((r) => r[t.headers.indexOf('bookmaker')])).size).toBe(Object.values(o.bookmakers).filter((ms: any) => ms.some((m: any) => m.name === 'Totals')).length)
+  })
+  it('drops bookmakers that do not price the market', () => {
+    expect(Object.keys(onlyMarket(o, 'Corners Totals').bookmakers)).toEqual(['LeoVegas IT'])
+  })
+  it('inserts every market when no market is chosen', () => {
+    const t = marketOddsTable(o, null, 's')
+    expect(marketsOf(t).size).toBeGreaterThan(3)
+    expect(t.notes[0]).toBe('Markets: all.')
   })
 })

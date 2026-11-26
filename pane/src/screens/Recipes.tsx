@@ -3,10 +3,10 @@ import type { League, Sport } from '../data'
 import { loadSelectedBookmakers } from '../data'
 import { copyForAi, insertTable } from '../insert'
 import { RECIPES, type RecipeId } from '../recipes/recipes'
-import { runRecipe } from '../recipes/run'
+import { DROPPING_MARKETS, MAIN_MARKETS, marketOptions, runRecipe } from '../recipes/run'
 import type { Table } from '../shape'
 import { client, go, host, toast } from '../state'
-import { Button, ErrorState, ListRow, Segmented } from '../ui/components'
+import { Button, ErrorState, Field, ListRow, Segmented } from '../ui/components'
 import { Icon } from '../ui/icons'
 import { BookmakerPicker, LeaguePicker, SportPicker } from './pickers'
 
@@ -19,9 +19,12 @@ interface Params {
   bookmaker: string
   minProfit: string
   minEv: string
+  minDrop: string
+  market: string
+  onlyMine: boolean
 }
 
-const DEFAULTS: Params = { sport: { name: 'Football', slug: 'football' }, league: { name: 'England - Premier League', slug: 'england-premier-league' }, bookmaker: '', minProfit: '1', minEv: '2' }
+const DEFAULTS: Params = { sport: { name: 'Football', slug: 'football' }, league: { name: 'England - Premier League', slug: 'england-premier-league' }, bookmaker: '', minProfit: '1', minEv: '2', minDrop: '0', market: '', onlyMine: true }
 
 const load = (id: string): Params => {
   try {
@@ -66,6 +69,7 @@ export function Recipe({ id }: { id: RecipeId }) {
   const [result, setResult] = useState<{ table: Table; sheet: string; at: Date } | null>(null)
   const [auto, setAuto] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [seenMarkets, setSeenMarkets] = useState<string[]>([])
   const timer = useRef<number | undefined>(undefined)
   const refreshing = useRef(false)
   const refreshRef = useRef<() => Promise<void>>(async () => {})
@@ -85,9 +89,14 @@ export function Recipe({ id }: { id: RecipeId }) {
     return runRecipe(
       id,
       client.value,
-      { sport: id === 'best-prices' || id === 'dropping' ? p.sport?.slug ?? 'football' : '', sportName: p.sport?.name ?? '', league: p.league?.slug ?? '', leagueName: p.league?.name ?? '', bookmaker: p.bookmaker, minProfit: p.minProfit, minEv: p.minEv },
+      { sport: id === 'best-prices' || id === 'dropping' ? p.sport?.slug ?? 'football' : '', sportName: p.sport?.name ?? '', league: p.league?.slug ?? '', leagueName: p.league?.name ?? '', bookmaker: p.bookmaker, minProfit: p.minProfit, minEv: p.minEv, minDrop: p.minDrop, market: p.market, onlyMine: p.onlyMine ? '1' : '0' },
       { selectedBookmakers: books },
     )
+  }
+
+  const remember = (table: Table) => {
+    const i = table.headers.indexOf('market')
+    if (i >= 0) setSeenMarkets((prev) => [...new Set([...prev, ...table.rows.map((r) => String(r[i] ?? ''))])])
   }
 
   const run = async () => {
@@ -95,6 +104,7 @@ export function Recipe({ id }: { id: RecipeId }) {
     setError(null)
     try {
       const table = await build()
+      remember(table)
       const sheet = await insertTable(table)
       if (sheet) setResult({ table, sheet, at: new Date() })
     } catch (e) {
@@ -110,6 +120,7 @@ export function Recipe({ id }: { id: RecipeId }) {
     setIsRefreshing(true)
     try {
       const table = { ...(await build()), name: result.sheet }
+      remember(table)
       await host().writeTable(table, 'replace')
       setResult({ table, sheet: result.sheet, at: new Date() })
     } catch (e) {
@@ -143,6 +154,36 @@ export function Recipe({ id }: { id: RecipeId }) {
       <section class="stack">
         {(id === 'best-prices' || id === 'dropping') && <SportPicker value={p.sport} onChange={(sport) => update({ sport, league: null })} />}
         {(id === 'best-prices' || id === 'dropping') && <LeaguePicker sport={p.sport} value={p.league} onChange={(league) => update({ league })} />}
+        {id === 'best-prices' && (
+          <>
+            <div class="field">
+              <span class="field-label">Market</span>
+              <Segmented
+                label="Market"
+                value={MAIN_MARKETS.includes(p.market) ? p.market : ''}
+                options={[{ value: '', label: 'All' }, ...MAIN_MARKETS.map((m) => ({ value: m, label: m }))]}
+                onChange={(market) => update({ market })}
+              />
+            </div>
+            <div class="field">
+              <label class="toggle">
+                <input type="checkbox" checked={p.onlyMine} onChange={(e) => update({ onlyMine: e.currentTarget.checked })} />
+                <span class="grow">Only my bookmakers</span>
+              </label>
+              <div class="field-hint">{p.onlyMine ? 'Compares the bookmakers on your key.' : 'Compares every bookmaker. Needs the Growth plan or higher.'}</div>
+            </div>
+          </>
+        )}
+        {id === 'dropping' && (
+          <MarketSelect value={p.market} options={marketOptions(DROPPING_MARKETS, seenMarkets)} onChange={(market) => update({ market })} />
+        )}
+        {id === 'dropping' && (
+          <div class="field">
+            <span class="field-label">Minimum drop</span>
+            <Segmented label="Minimum drop" value={p.minDrop} options={['0', '5', '10', '20'].map((v) => ({ value: v, label: `${v}%` }))} onChange={(minDrop) => update({ minDrop })} />
+            <div class="field-hint">Drop since opening.</div>
+          </div>
+        )}
         {id === 'arbs' && (
           <div class="field">
             <span class="field-label">Minimum profit</span>
@@ -153,6 +194,7 @@ export function Recipe({ id }: { id: RecipeId }) {
         {id === 'value' && (
           <>
             <BookmakerPicker value={p.bookmaker} onChange={(bookmaker) => update({ bookmaker })} />
+            <MarketSelect value={p.market} options={marketOptions(MAIN_MARKETS, seenMarkets)} onChange={(market) => update({ market })} />
             <div class="field">
               <span class="field-label">Minimum edge</span>
               <Segmented label="Minimum edge" value={p.minEv} options={['0', '2', '5', '10'].map((v) => ({ value: v, label: `${v}%` }))} onChange={(minEv) => update({ minEv })} />
@@ -210,5 +252,19 @@ export function Recipe({ id }: { id: RecipeId }) {
         </section>
       )}
     </div>
+  )
+}
+
+function MarketSelect({ value, options, onChange }: { value: string; options: string[]; onChange: (m: string) => void }) {
+  const all = value && !options.includes(value) ? [...options, value] : options
+  return (
+    <Field label="Market" id="recipe-market">
+      <select id="recipe-market" class="input" value={value} onChange={(e) => onChange(e.currentTarget.value)}>
+        <option value="">All markets</option>
+        {all.map((m) => (
+          <option value={m}>{m}</option>
+        ))}
+      </select>
+    </Field>
   )
 }

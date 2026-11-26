@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks'
 import { ENDPOINTS, fillPath, type Endpoint } from '../api/endpoints'
 import { loadSelectedBookmakers } from '../data'
 import { copyText, TableActions } from '../insert'
-import { defaultsFor, shapeResponse } from '../playground'
+import { dateDefault, defaultsFor, shapeResponse } from '../playground'
 import { client, lastEventId, toast } from '../state'
 import { BottomSheet, Button, ErrorState, Field, IconButton, Segmented, SearchList } from '../ui/components'
 import { Icon } from '../ui/icons'
@@ -85,14 +85,14 @@ export function Playground() {
 
       <section class="stack">
         {required.map((p) => (
-          <ParamField p={p} value={values[p.name] ?? ''} onChange={(v) => setValues({ ...values, [p.name]: v })} />
+          <ParamField p={p} placeholder={dateDefault(ep, p.name)} value={values[p.name] ?? ''} onChange={(v) => setValues({ ...values, [p.name]: v })} />
         ))}
         {optional.length > 0 && (
           <button type="button" class="link-btn" onClick={() => setShowOptional(!showOptional)}>
             {showOptional ? 'Hide optional parameters' : `${optional.length} optional parameters`}
           </button>
         )}
-        {showOptional && optional.map((p) => <ParamField p={p} value={values[p.name] ?? ''} onChange={(v) => setValues({ ...values, [p.name]: v })} />)}
+        {showOptional && optional.map((p) => <ParamField p={p} placeholder={dateDefault(ep, p.name)} value={values[p.name] ?? ''} onChange={(v) => setValues({ ...values, [p.name]: v })} />)}
       </section>
 
       <div class="request">
@@ -141,7 +141,7 @@ export function Playground() {
   )
 }
 
-function ParamField({ p, value, onChange }: { p: Endpoint['params'][number]; value: string; onChange: (v: string) => void }) {
+function ParamField({ p, value, placeholder, onChange }: { p: Endpoint['params'][number]; value: string; placeholder?: string; onChange: (v: string) => void }) {
   const id = `param-${p.name}`
   return (
     <Field label={`${p.name}${p.required ? '' : ' (optional)'}`} id={id} hint={p.description}>
@@ -153,7 +153,7 @@ function ParamField({ p, value, onChange }: { p: Endpoint['params'][number]; val
           ))}
         </select>
       ) : (
-        <input id={id} class="input" value={value} placeholder={p.example ?? ''} spellcheck={false} onInput={(e) => onChange(e.currentTarget.value)} />
+        <input id={id} class="input" value={value} placeholder={placeholder ?? p.example ?? ''} spellcheck={false} onInput={(e) => onChange(e.currentTarget.value)} />
       )}
     </Field>
   )

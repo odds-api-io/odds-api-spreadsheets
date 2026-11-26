@@ -49,15 +49,28 @@ const POPULAR = ['Bet365', 'Unibet', 'William Hill', 'Betfair Exchange', 'DraftK
 
 export const preferredBookmakers = (books: string[]) => [...POPULAR.filter((b) => books.includes(b)), ...books.filter((b) => !POPULAR.includes(b))]
 
-export function defaultsFor(ep: Endpoint, ctx: { eventId?: string; bookmakers: string[] }) {
+const DAY = 86_400_000
+const rfc3339 = (ms: number) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z')
+
+export function dateDefault(ep: Endpoint, name: string, now: Date = new Date()): string | undefined {
+  const t = now.getTime()
+  if (name === 'since') return String(Math.floor(t / 1000) - 30)
+  if (name !== 'from' && name !== 'to') return undefined
+  if (ep.path.startsWith('/historical')) return rfc3339(name === 'from' ? t - 7 * DAY : t)
+  return rfc3339(name === 'from' ? t : t + 7 * DAY)
+}
+
+export function defaultsFor(ep: Endpoint, ctx: { eventId?: string; bookmakers: string[]; now?: Date }) {
   const v: Record<string, string> = {}
   for (const p of ep.params) {
     if (!p.required) continue
+    const date = dateDefault(ep, p.name, ctx.now)
     if ((p.name === 'eventId' || p.name === 'id') && ctx.eventId && !ep.path.startsWith('/outrights') && !ep.path.startsWith('/participants')) v[p.name] = ctx.eventId
     else if (p.name === 'eventIds' && ctx.eventId) v[p.name] = ctx.eventId
     else if (p.name === 'bookmakers' && ctx.bookmakers.length) v[p.name] = preferredBookmakers(ctx.bookmakers).slice(0, 5).join(',')
     else if (p.name === 'bookmaker' && ctx.bookmakers.length) v[p.name] = ctx.bookmakers.includes('Bet365') ? 'Bet365' : ctx.bookmakers[0]
     else if (p.name === 'market') v[p.name] = p.example ?? 'ML'
+    else if (date !== undefined) v[p.name] = date
     else if (p.example !== undefined) v[p.name] = p.example
   }
   return v

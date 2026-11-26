@@ -3,9 +3,9 @@ import { loadSelectedBookmakers } from '../data'
 import { formatOdds, groupBoards, loadBestPrices, loadOddsForBookmakers, summaryMainLines, type Board } from '../explore'
 import { fmtKickoff, fmtLine, fmtSelection } from '../format'
 import { insertTable, TableActions } from '../insert'
-import { bestPricesFromOdds, bestPricesTable, movementsTable, oddsTable, type ApiEvent, type ApiMovements, type ApiOdds, type ApiSummary, type BestPrice } from '../shape'
+import { bestPricesFromOdds, bestPricesTable, marketOddsTable, movementsTable, type ApiEvent, type ApiMovements, type ApiOdds, type ApiSummary, type BestPrice } from '../shape'
 import { client, lastEventId, settings, toast } from '../state'
-import { Badge, BottomSheet, Button, EmptyState, ErrorState, SearchList, Skeleton, Sparkline } from '../ui/components'
+import { Badge, BottomSheet, Button, EmptyState, ErrorState, SearchList, Segmented, Skeleton, Sparkline } from '../ui/components'
 
 const MOVEMENT_BOOKS = ['Bet365', 'Betfair Exchange', 'DraftKings', 'FanDuel', 'William Hill', 'Unibet', '1xbet', 'Betano', 'BetMGM', 'Betway', 'Stake', 'Kambi']
 
@@ -27,6 +27,7 @@ export function EventDetail({ id }: { id: number | string }) {
   const [market, setMarket] = useState<string | null>(null)
   const [nonce, setNonce] = useState(0)
   const [allBusy, setAllBusy] = useState(false)
+  const [scope, setScope] = useState<'market' | 'all'>('market')
 
   useEffect(() => {
     lastEventId.value = id
@@ -117,7 +118,7 @@ export function EventDetail({ id }: { id: number | string }) {
               setAllBusy(true)
               try {
                 const odds = data.odds ?? (await loadOddsForBookmakers(c, id, filter.length ? filter : keyBooks))
-                await insertTable(oddsTable(odds, c.url('/odds', { eventId: id, bookmakers: '…' }, true)))
+                await insertTable(marketOddsTable(odds, scope === 'market' ? activeMarket ?? null : null, c.url('/odds', { eventId: id, bookmakers: '…' }, true)))
               } catch (e) {
                 toast(e instanceof Error ? e.message : String(e))
               } finally {
@@ -127,6 +128,15 @@ export function EventDetail({ id }: { id: number | string }) {
           >
             Insert every bookmaker's odds
           </Button>
+          <div class="field">
+            <Segmented
+              label="Markets to insert"
+              value={scope}
+              options={[{ value: 'market', label: 'This market' }, { value: 'all', label: 'All markets' }]}
+              onChange={setScope}
+            />
+            <div class="field-hint">{scope === 'market' && activeMarket ? `Inserts ${activeMarket} odds from every bookmaker.` : 'Inserts every market from every bookmaker.'}</div>
+          </div>
           <Movement eventId={id} market={activeMarket ?? 'ML'} keyBooks={keyBooks} />
         </>
       )}

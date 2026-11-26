@@ -110,3 +110,17 @@ export const bestPricesTable = (event: Pick<ApiEvent, 'id' | 'home' | 'away' | '
     ['fair_odds', 'odds', (p) => p.fair ?? null],
     ['books', 'number', (p) => p.books],
   ], source, ['Best available price per selection across bookmakers.'])
+
+export function onlyMarket(o: ApiOdds, market: string): ApiOdds {
+  const bookmakers: ApiOdds['bookmakers'] = {}
+  for (const [b, markets] of Object.entries(o.bookmakers ?? {})) {
+    const kept = markets.filter((m) => m.name === market)
+    if (kept.length) bookmakers[b] = kept
+  }
+  return { ...o, bookmakers }
+}
+
+export function marketOddsTable(o: ApiOdds, market: string | null, source: string): Table {
+  const t = market ? oddsTable(onlyMarket(o, market), source, `Odds ${market} ${o.home} v ${o.away}`) : oddsTable(o, source, `Odds all markets ${o.home} v ${o.away}`)
+  return { ...t, notes: [market ? `Market: ${market}.` : 'Markets: all.', ...t.notes] }
+}

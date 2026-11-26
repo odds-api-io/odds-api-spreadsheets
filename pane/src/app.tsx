@@ -1,5 +1,6 @@
-import { back, canGoBack, ready, route, settings, switchTab, tab, toasts, go, type Tab } from './state'
-import { Icon, type IconName } from './ui/icons'
+import { back, canGoBack, ready, route, settings, switchTab, tab, toasts, go } from './state'
+import { Icon } from './ui/icons'
+import { TABS, TITLES } from './nav'
 import { IconButton, Skeleton } from './ui/components'
 import { Kit } from './screens/Kit'
 import { Onboarding } from './screens/Onboarding'
@@ -11,14 +12,6 @@ import { InsertLayer } from './insert'
 import { Recipe, RecipeList } from './screens/Recipes'
 import { RECIPES, type RecipeId } from './recipes/recipes'
 import { Playground } from './screens/Playground'
-
-const TABS: { id: Tab; label: string; icon: IconName }[] = [
-  { id: 'explore', label: 'Explore', icon: 'compass' },
-  { id: 'recipes', label: 'Recipes', icon: 'bolt' },
-  { id: 'playground', label: 'Playground', icon: 'code' },
-]
-
-const TITLES: Record<string, string> = { recipes: 'Recipes', recipe: 'Recipe', playground: 'API playground', settings: 'Settings', kit: 'Component kit' }
 
 function Screen() {
   const r = route.value
