@@ -1,4 +1,4 @@
-import { build, num, type Cell, type Table } from './table'
+import { build, num, sheetName, type Cell, type Table } from './table'
 import type { ApiEvent, ApiOdds, ApiSummary } from './types'
 
 const NOT_SELECTIONS = new Set(['hdp', 'label', 'max'])
@@ -123,4 +123,9 @@ export function onlyMarket(o: ApiOdds, market: string): ApiOdds {
 export function marketOddsTable(o: ApiOdds, market: string | null, source: string): Table {
   const t = market ? oddsTable(onlyMarket(o, market), source, `Odds ${market} ${o.home} v ${o.away}`) : oddsTable(o, source, `Odds all markets ${o.home} v ${o.away}`)
   return { ...t, notes: [market ? `Market: ${market}.` : 'Markets: all.', ...t.notes] }
+}
+
+export function marketBestPricesTable(event: Pick<ApiEvent, 'id' | 'home' | 'away' | 'date'>, prices: BestPrice[], market: string | null, source: string): Table {
+  const t = bestPricesTable(event, market ? prices.filter((p) => p.market === market) : prices, source)
+  return { ...t, name: sheetName(`Best ${market ?? 'all markets'} ${event.home} v ${event.away}`), notes: [market ? `Market: ${market}.` : 'Markets: all.', ...t.notes] }
 }

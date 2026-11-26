@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { ApiClient } from '../src/api/client'
-import { loadBestPrices, formatOdds } from '../src/explore'
+import { bestPricesInsert, everyBookInsert, loadBestPrices, formatOdds } from '../src/explore'
 import summary from './fixtures/summary.json'
 import odds from './fixtures/odds.json'
 
@@ -85,5 +85,62 @@ describe('summary demo responses', () => {
     const f = respond({ '/odds/summary': [200, { ...summary, demo: true }], '/odds': [200, odds] })
     const r = await loadBestPrices(new ApiClient('k', f as any), 72221406, ['888Sport'])
     expect(r.source).toBe('odds')
+  })
+})
+
+describe('event detail inserts respect the market scope', () => {
+  const ev = { id: 72221406, home: 'H', away: 'A', date: '2026-11-21T12:30:00Z' }
+  const marketsOf = (t: any) => new Set(t.rows.map((r: unknown[]) => r[t.headers.indexOf('market')]))
+  const unfiltered = async () => {
+    const f = respond({ '/odds/summary': [200, summary], '/odds': [200, odds] })
+    const c = new ApiClient('k', f as any)
+    return { c, f, data: await loadBestPrices(c, ev.id, ['888Sport', 'Bwin ES']) }
+  }
+  const filtered = async () => {
+    const f = respond({ '/odds': [200, odds] })
+    const c = new ApiClient('k', f as any)
+    const o = await loadOddsForBookmakers(c, ev.id, ['888Sport', 'LeoVegas IT'])
+    return { c, f, data: { source: 'odds' as const, prices: bestPricesFromOdds(o), odds: o } }
+  }
+
+  for (const [label, setup] of [['summary path', unfiltered], ['chosen bookmakers', filtered]] as const) {
+    it(`best prices, this market (${label})`, async () => {
+      const { c, data } = await setup()
+      const t = bestPricesInsert(c, ev, data, 'ML')
+      expect(marketsOf(t)).toEqual(new Set(['ML']))
+      expect(t.name).toBe('Best ML H v A')
+      expect(t.notes[0]).toBe('Market: ML.')
+    })
+    it(`best prices, all markets (${label})`, async () => {
+      const { c, data } = await setup()
+      const t = bestPricesInsert(c, ev, data, null)
+      expect(marketsOf(t).size).toBeGreaterThan(1)
+      expect(t.rows.length).toBe(data.prices.length)
+      expect(t.name).toBe('Best all markets H v A')
+      expect(t.notes[0]).toBe('Markets: all.')
+    })
+    it(`every bookmaker's odds, this market (${label})`, async () => {
+      const { c, data } = await setup()
+      const t = await everyBookInsert(c, ev.id, data, ['888Sport', 'Bwin ES'], 'Totals')
+      expect(marketsOf(t)).toEqual(new Set(['Totals']))
+      expect(t.notes[0]).toBe('Market: Totals.')
+    })
+    it(`every bookmaker's odds, all markets (${label})`, async () => {
+      const { c, data } = await setup()
+      const t = await everyBookInsert(c, ev.id, data, ['888Sport', 'Bwin ES'], null)
+      expect(marketsOf(t).size).toBeGreaterThan(3)
+      expect(t.notes[0]).toBe('Markets: all.')
+    })
+  }
+
+  it('the filtered path asks /odds for the chosen bookmakers only', async () => {
+    const { f } = await filtered()
+    expect(String(f.mock.calls[0][0])).toContain('bookmakers=888Sport%2CLeoVegas+IT')
+  })
+
+  it('the summary path fetches odds for every-bookmaker insert with the key bookmakers', async () => {
+    const { c, f, data } = await unfiltered()
+    await everyBookInsert(c, ev.id, data, ['888Sport', 'Bwin ES'], 'ML')
+    expect(String(f.mock.calls.at(-1)![0])).toContain('bookmakers=888Sport%2CBwin+ES')
   })
 })

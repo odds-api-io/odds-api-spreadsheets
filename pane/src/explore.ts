@@ -1,6 +1,6 @@
 import type { ApiClient } from './api/client'
 import { ApiError } from './api/errors'
-import { bestPricesFromOdds, bestPricesFromSummary, type ApiOdds, type ApiSummary, type BestPrice } from './shape'
+import { bestPricesFromOdds, bestPricesFromSummary, marketBestPricesTable, marketOddsTable, type ApiEvent, type ApiOdds, type ApiSummary, type BestPrice, type Table } from './shape'
 import type { Settings } from './host/host'
 
 export const MAX_BOOKMAKERS_PER_CALL = 30
@@ -23,6 +23,17 @@ export async function loadBestPrices(c: ApiClient, eventId: number | string, boo
   }
   const odds = await loadOddsForBookmakers(c, eventId, bookmakers)
   return { source: 'odds', prices: bestPricesFromOdds(odds), odds }
+}
+
+export type LoadedPrices = Awaited<ReturnType<typeof loadBestPrices>>
+type EventRef = Pick<ApiEvent, 'id' | 'home' | 'away' | 'date'>
+
+export const bestPricesInsert = (c: ApiClient, event: EventRef, data: LoadedPrices, market: string | null): Table =>
+  marketBestPricesTable(event, data.prices, market, c.url(data.source === 'summary' ? '/odds/summary' : '/odds', { eventId: event.id }, true))
+
+export async function everyBookInsert(c: ApiClient, eventId: number | string, data: LoadedPrices, bookmakers: string[], market: string | null): Promise<Table> {
+  const odds = data.odds ?? (await loadOddsForBookmakers(c, eventId, bookmakers))
+  return marketOddsTable(odds, market, c.url('/odds', { eventId, bookmakers: '…' }, true))
 }
 
 const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a)

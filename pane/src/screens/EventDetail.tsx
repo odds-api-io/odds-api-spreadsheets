@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'preact/hooks'
 import { loadSelectedBookmakers } from '../data'
-import { formatOdds, groupBoards, loadBestPrices, loadOddsForBookmakers, summaryMainLines, type Board } from '../explore'
+import { bestPricesInsert, everyBookInsert, formatOdds, groupBoards, loadBestPrices, loadOddsForBookmakers, summaryMainLines, type Board } from '../explore'
 import { fmtKickoff, fmtLine, fmtSelection } from '../format'
 import { insertTable, TableActions } from '../insert'
-import { bestPricesFromOdds, bestPricesTable, marketOddsTable, movementsTable, type ApiEvent, type ApiMovements, type ApiOdds, type ApiSummary, type BestPrice } from '../shape'
+import { bestPricesFromOdds, movementsTable, type ApiEvent, type ApiMovements, type ApiOdds, type ApiSummary, type BestPrice } from '../shape'
 import { client, lastEventId, settings, toast } from '../state'
 import { Badge, BottomSheet, Button, EmptyState, ErrorState, SearchList, Segmented, Skeleton, Sparkline } from '../ui/components'
 
@@ -53,6 +53,7 @@ export function EventDetail({ id }: { id: number | string }) {
   const board = boards.find((b) => b.market === activeMarket)
   const ev = event ?? (data?.odds as ApiEvent | undefined) ?? (data?.summary ? ({ id, home: data.summary.home, away: data.summary.away, date: data.summary.date } as ApiEvent) : null)
   const live = ev?.status === 'live'
+  const scopeMarket = scope === 'market' ? activeMarket ?? null : null
   const bookCount = data ? Math.max(0, ...data.prices.map((p) => p.books)) : 0
 
   return (
@@ -106,9 +107,18 @@ export function EventDetail({ id }: { id: number | string }) {
               ? `Best price across ${bookCount} bookmakers. Fair is the margin-free price.`
               : `Best price across ${filter.length ? 'the chosen' : 'your'} bookmakers.`}
           </p>
+          <div class="field">
+            <Segmented
+              label="Markets to insert"
+              value={scope}
+              options={[{ value: 'market', label: 'This market' }, { value: 'all', label: 'All markets' }]}
+              onChange={setScope}
+            />
+            <div class="field-hint">{scopeMarket ? `Inserts ${scopeMarket} only.` : 'Inserts every market.'}</div>
+          </div>
           <TableActions
             label="Insert best prices"
-            build={() => bestPricesTable(ev ?? { id, home: '', away: '', date: '' }, data.prices, c.url(data.source === 'summary' ? '/odds/summary' : '/odds', { eventId: id }, true))}
+            build={() => bestPricesInsert(c, ev ?? { id, home: '', away: '', date: '' }, data, scopeMarket)}
           />
           <Button
             block
@@ -117,8 +127,7 @@ export function EventDetail({ id }: { id: number | string }) {
             onClick={async () => {
               setAllBusy(true)
               try {
-                const odds = data.odds ?? (await loadOddsForBookmakers(c, id, filter.length ? filter : keyBooks))
-                await insertTable(marketOddsTable(odds, scope === 'market' ? activeMarket ?? null : null, c.url('/odds', { eventId: id, bookmakers: '…' }, true)))
+                await insertTable(await everyBookInsert(c, id, data, filter.length ? filter : keyBooks, scopeMarket))
               } catch (e) {
                 toast(e instanceof Error ? e.message : String(e))
               } finally {
@@ -128,15 +137,6 @@ export function EventDetail({ id }: { id: number | string }) {
           >
             Insert every bookmaker's odds
           </Button>
-          <div class="field">
-            <Segmented
-              label="Markets to insert"
-              value={scope}
-              options={[{ value: 'market', label: 'This market' }, { value: 'all', label: 'All markets' }]}
-              onChange={setScope}
-            />
-            <div class="field-hint">{scope === 'market' && activeMarket ? `Inserts ${activeMarket} odds from every bookmaker.` : 'Inserts every market from every bookmaker.'}</div>
-          </div>
           <Movement eventId={id} market={activeMarket ?? 'ML'} keyBooks={keyBooks} />
         </>
       )}
